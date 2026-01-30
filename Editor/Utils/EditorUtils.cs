@@ -712,6 +712,8 @@ namespace ME.BECS.Editor {
 
                 var data = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{searchPath}Editor/EditorResources/{path}");
                 if (data != null) return data;
+                data = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{searchPath}Editor/Resources/{path}");
+                if (data != null) return data;
 
             }
 
