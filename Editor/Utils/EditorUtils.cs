@@ -700,7 +700,18 @@ namespace ME.BECS.Editor {
             "Assets/ECS/",
             "Assets/",
         };
-        
+
+        private static string resolvedPackagePath;
+        private static string GetResolvedPackagePath() {
+            if (resolvedPackagePath == null) {
+                var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssetPath("Packages/com.me.becs");
+                if (packageInfo != null) {
+                    resolvedPackagePath = packageInfo.resolvedPath.Replace('\\', '/') + "/";
+                }
+            }
+            return resolvedPackagePath;
+        }
+
         public static T LoadResource<T>(string path, bool isRequired = true) where T : UnityEngine.Object {
 
             if (path.StartsWith("Assets/") == true) {
@@ -717,6 +728,15 @@ namespace ME.BECS.Editor {
 
             }
 
+            // Fallback: try resolved package path for git-based packages
+            var resolvedPath = GetResolvedPackagePath();
+            if (resolvedPath != null) {
+                var data = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{resolvedPath}Editor/EditorResources/{path}");
+                if (data != null) return data;
+                data = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{resolvedPath}Editor/Resources/{path}");
+                if (data != null) return data;
+            }
+
             foreach (var searchPath in searchPaths) {
 
                 var rootDir = $"{searchPath}Addons";
@@ -730,6 +750,19 @@ namespace ME.BECS.Editor {
                     }
                 }
 
+            }
+
+            // Fallback: try resolved package Addons path for git-based packages
+            if (resolvedPath != null) {
+                var rootDir = $"{resolvedPath}Addons";
+                if (System.IO.Directory.Exists(rootDir) == true) {
+                    var dirs = System.IO.Directory.GetDirectories(rootDir);
+                    foreach (var dir in dirs) {
+                        var normalizedDir = dir.Replace('\\', '/');
+                        var data = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{normalizedDir}/Editor/EditorResources/{path}");
+                        if (data != null) return data;
+                    }
+                }
             }
 
             var paths = path.Split('/');
