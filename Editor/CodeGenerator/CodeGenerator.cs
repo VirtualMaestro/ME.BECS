@@ -872,6 +872,15 @@ namespace ME.BECS.Editor {
                         }
                     }
                 }
+				
+				// Add required editor assemblies for generated editor 
+				if (editorAssembly == true) {                 
+					content.Add("ME.BECS.Editor");    
+					content.Add("ME.BECS.Features.Editor");      	
+					content.Add("ME.BECS.Views.Editor");
+					content.Add("ME.BECS.Units.Editor");
+					content.Add("ME.BECS.Network.Editor");
+				}
 
                 var newContent = template.Replace("{{CONTENT}}", string.Join(@""",""", content.OrderBy(x => x).ToArray()));
                 var prevContent = System.IO.File.Exists(path) == true ? System.IO.File.ReadAllText(path) : string.Empty;
