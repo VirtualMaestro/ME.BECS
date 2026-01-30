@@ -744,7 +744,7 @@ namespace ME.BECS.Editor {
             }
 
             {
-                var fileNameWithoutExtension = $"{System.IO.Path.GetDirectoryName(path)}/{System.IO.Path.GetFileNameWithoutExtension(path)}";
+                var fileNameWithoutExtension = $"{System.IO.Path.GetDirectoryName(path)}/{System.IO.Path.GetFileNameWithoutExtension(path)}".Replace('\\', '/');
                 var obj = UnityEngine.Resources.Load<T>(fileNameWithoutExtension);
                 if (obj != null) return obj;
             }
