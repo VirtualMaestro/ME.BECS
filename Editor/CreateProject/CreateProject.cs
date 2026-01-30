@@ -191,15 +191,15 @@ namespace ME.BECS.Editor.CreateProject {
             },
         };
 
-        public static void Create(string path, string projectName, string template, Mode mode) {
+        public static void Create(string path, string projectName, string template, Mode mode, string templatePath = null) {
             path = $"{path}/{projectName}";
             path = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(path);
             {
-                CreateTemplateScript(path, projectName, template, mode);
+                CreateTemplateScript(path, projectName, template, mode, templatePath);
             }
         }
 
-        private static void CreateTemplateScript(string path, string name, string template, Mode mode) {
+        private static void CreateTemplateScript(string path, string name, string template, Mode mode, string templatePath) {
 
             var dir = $"ME.BECS.Resources/Templates/{template}";
             var templateAsset = EditorUtils.LoadResource<UnityEngine.TextAsset>($"{dir}/template.json");
@@ -207,7 +207,13 @@ namespace ME.BECS.Editor.CreateProject {
             var templateJson = JsonUtility.FromJson<TemplateJson>(json);
 
             var modeJson = templateJson.modes.FirstOrDefault(x => x.mode == (int)mode);
-            CreateTemplate(modeJson, System.IO.Path.GetDirectoryName(AssetDatabase.GetAssetPath(templateAsset)), dir, path, name);
+
+            // Use provided templatePath if available, otherwise try to derive from asset
+            if (string.IsNullOrEmpty(templatePath)) {
+                templatePath = System.IO.Path.GetDirectoryName(AssetDatabase.GetAssetPath(templateAsset));
+            }
+
+            CreateTemplate(modeJson, templatePath, dir, path, name);
 
         }
 

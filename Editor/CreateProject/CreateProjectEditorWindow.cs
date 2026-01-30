@@ -95,7 +95,8 @@ namespace ME.BECS.Editor {
             root.styleSheets.Add(this.styleSheet);
 
             var createButton = new Button(() => {
-                CreateProject.NewProject.Create(this.path, this.projectName, genres[this.genreIndex].template, ((TemplateInfo)this.modesList.itemsSource[this.modeIndex]).mode);
+                var selectedGenre = genres[this.genreIndex];
+                CreateProject.NewProject.Create(this.path, this.projectName, selectedGenre.template, ((TemplateInfo)this.modesList.itemsSource[this.modeIndex]).mode, selectedGenre.templatePath);
                 this.Close();
             });
 
