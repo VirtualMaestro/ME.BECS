@@ -743,29 +743,66 @@ namespace ME.BECS.Editor {
 
             }
 
-            // Fallback: try reading TextAsset directly from resolved package path (for git-based packages during early init)
+            // Fallback: try reading assets directly from resolved package path (for git-based packages during early init)
             var resolvedPath = GetResolvedPackagePath();
-            if (resolvedPath != null && typeof(T) == typeof(UnityEngine.TextAsset)) {
+            if (resolvedPath != null) {
                 var filePaths = new[] {
                     $"{resolvedPath}Editor/EditorResources/{path}",
                     $"{resolvedPath}Editor/Resources/{path}",
                 };
-                foreach (var filePath in filePaths) {
-                    if (System.IO.File.Exists(filePath)) {
-                        var content = System.IO.File.ReadAllText(filePath);
-                        return new UnityEngine.TextAsset(content) as T;
-                    }
-                }
-                // Also check Addons
-                var addonsDir = $"{resolvedPath}Addons";
-                if (System.IO.Directory.Exists(addonsDir)) {
-                    var dirs = System.IO.Directory.GetDirectories(addonsDir);
-                    foreach (var dir in dirs) {
-                        var filePath = $"{dir}/Editor/EditorResources/{path}".Replace('\\', '/');
+
+                // Handle TextAsset
+                if (typeof(T) == typeof(UnityEngine.TextAsset)) {
+                    foreach (var filePath in filePaths) {
                         if (System.IO.File.Exists(filePath)) {
                             var content = System.IO.File.ReadAllText(filePath);
                             return new UnityEngine.TextAsset(content) as T;
                         }
+                    }
+                    // Also check Addons
+                    var addonsDir = $"{resolvedPath}Addons";
+                    if (System.IO.Directory.Exists(addonsDir)) {
+                        var dirs = System.IO.Directory.GetDirectories(addonsDir);
+                        foreach (var dir in dirs) {
+                            var filePath = $"{dir}/Editor/EditorResources/{path}".Replace('\\', '/');
+                            if (System.IO.File.Exists(filePath)) {
+                                var content = System.IO.File.ReadAllText(filePath);
+                                return new UnityEngine.TextAsset(content) as T;
+                            }
+                        }
+                    }
+                }
+
+                // Handle Texture2D
+                if (typeof(T) == typeof(UnityEngine.Texture2D)) {
+                    foreach (var filePath in filePaths) {
+                        if (System.IO.File.Exists(filePath)) {
+                            var bytes = System.IO.File.ReadAllBytes(filePath);
+                            var texture = new UnityEngine.Texture2D(2, 2);
+                            texture.LoadImage(bytes);
+                            return texture as T;
+                        }
+                    }
+                    // Also check Addons
+                    var addonsDir = $"{resolvedPath}Addons";
+                    if (System.IO.Directory.Exists(addonsDir)) {
+                        var dirs = System.IO.Directory.GetDirectories(addonsDir);
+                        foreach (var dir in dirs) {
+                            var filePath = $"{dir}/Editor/EditorResources/{path}".Replace('\\', '/');
+                            if (System.IO.File.Exists(filePath)) {
+                                var bytes = System.IO.File.ReadAllBytes(filePath);
+                                var texture = new UnityEngine.Texture2D(2, 2);
+                                texture.LoadImage(bytes);
+                                return texture as T;
+                            }
+                        }
+                    }
+                    // Also try direct path (for template icons loaded with absolute path)
+                    if (System.IO.File.Exists(path)) {
+                        var bytes = System.IO.File.ReadAllBytes(path);
+                        var texture = new UnityEngine.Texture2D(2, 2);
+                        texture.LoadImage(bytes);
+                        return texture as T;
                     }
                 }
             }

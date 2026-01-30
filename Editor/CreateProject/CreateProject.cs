@@ -43,7 +43,7 @@ namespace ME.BECS.Editor.CreateProject {
             this.description = json.description;
             this.templatePath = System.IO.Path.GetDirectoryName(path);
             this.icon = EditorUtils.LoadResource<Texture2D>($"{this.templatePath}/icon.png", isRequired: false);
-            if (this.icon == null) this.icon = EditorUtils.LoadResource<Texture2D>("ME.BECS.Resources/Icons/Templates/Other.png");
+            if (this.icon == null) this.icon = EditorUtils.LoadResource<Texture2D>("ME.BECS.Resources/Icons/Templates/Other.png", isRequired: false);
             this.template = System.IO.Path.GetFileNameWithoutExtension(System.IO.Path.GetDirectoryName(path));
             this.modes = json.modes;
             this.mode = default;
