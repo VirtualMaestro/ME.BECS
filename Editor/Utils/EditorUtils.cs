@@ -779,7 +779,7 @@ namespace ME.BECS.Editor {
                         if (System.IO.File.Exists(filePath)) {
                             var bytes = System.IO.File.ReadAllBytes(filePath);
                             var texture = new UnityEngine.Texture2D(2, 2);
-                            texture.LoadImage(bytes);
+                            UnityEngine.ImageConversion.LoadImage(texture, bytes);
                             return texture as T;
                         }
                     }
@@ -792,7 +792,7 @@ namespace ME.BECS.Editor {
                             if (System.IO.File.Exists(filePath)) {
                                 var bytes = System.IO.File.ReadAllBytes(filePath);
                                 var texture = new UnityEngine.Texture2D(2, 2);
-                                texture.LoadImage(bytes);
+                                UnityEngine.ImageConversion.LoadImage(texture, bytes);
                                 return texture as T;
                             }
                         }
@@ -801,7 +801,7 @@ namespace ME.BECS.Editor {
                     if (System.IO.File.Exists(path)) {
                         var bytes = System.IO.File.ReadAllBytes(path);
                         var texture = new UnityEngine.Texture2D(2, 2);
-                        texture.LoadImage(bytes);
+                        UnityEngine.ImageConversion.LoadImage(texture, bytes);
                         return texture as T;
                     }
                 }
