@@ -68,6 +68,27 @@ namespace ME.BECS.Editor {
                     }
                 } catch (System.Exception) {}
             }
+
+            // Fallback: search resolved package path for git-based packages
+            if (genres.Count == 0) {
+                var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssetPath("Packages/com.me.becs");
+                if (packageInfo != null) {
+                    var resolvedPath = packageInfo.resolvedPath.Replace('\\', '/');
+                    var templatesDir = $"{resolvedPath}/Editor/CreateProject/Resources/ME.BECS.Resources/Templates";
+                    if (System.IO.Directory.Exists(templatesDir)) {
+                        var templateFiles = System.IO.Directory.GetFiles(templatesDir, "template.json", System.IO.SearchOption.AllDirectories);
+                        foreach (var templateFile in templateFiles) {
+                            var json = System.IO.File.ReadAllText(templateFile);
+                            try {
+                                var templateInfo = JsonUtility.FromJson<TemplateInfoJson>(json);
+                                if (templateInfo.IsValid() == true) {
+                                    genres.Add(new TemplateInfo(templateFile.Replace('\\', '/'), templateInfo));
+                                }
+                            } catch (System.Exception) {}
+                        }
+                    }
+                }
+            }
             
             var root = this.rootVisualElement;
             EditorUIUtils.ApplyDefaultStyles(root);
