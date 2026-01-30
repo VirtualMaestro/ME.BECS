@@ -728,15 +728,6 @@ namespace ME.BECS.Editor {
 
             }
 
-            // Fallback: try resolved package path for git-based packages
-            var resolvedPath = GetResolvedPackagePath();
-            if (resolvedPath != null) {
-                var data = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{resolvedPath}Editor/EditorResources/{path}");
-                if (data != null) return data;
-                data = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{resolvedPath}Editor/Resources/{path}");
-                if (data != null) return data;
-            }
-
             foreach (var searchPath in searchPaths) {
 
                 var rootDir = $"{searchPath}Addons";
@@ -752,15 +743,29 @@ namespace ME.BECS.Editor {
 
             }
 
-            // Fallback: try resolved package Addons path for git-based packages
-            if (resolvedPath != null) {
-                var rootDir = $"{resolvedPath}Addons";
-                if (System.IO.Directory.Exists(rootDir) == true) {
-                    var dirs = System.IO.Directory.GetDirectories(rootDir);
+            // Fallback: try reading TextAsset directly from resolved package path (for git-based packages during early init)
+            var resolvedPath = GetResolvedPackagePath();
+            if (resolvedPath != null && typeof(T) == typeof(UnityEngine.TextAsset)) {
+                var filePaths = new[] {
+                    $"{resolvedPath}Editor/EditorResources/{path}",
+                    $"{resolvedPath}Editor/Resources/{path}",
+                };
+                foreach (var filePath in filePaths) {
+                    if (System.IO.File.Exists(filePath)) {
+                        var content = System.IO.File.ReadAllText(filePath);
+                        return new UnityEngine.TextAsset(content) as T;
+                    }
+                }
+                // Also check Addons
+                var addonsDir = $"{resolvedPath}Addons";
+                if (System.IO.Directory.Exists(addonsDir)) {
+                    var dirs = System.IO.Directory.GetDirectories(addonsDir);
                     foreach (var dir in dirs) {
-                        var normalizedDir = dir.Replace('\\', '/');
-                        var data = UnityEditor.AssetDatabase.LoadAssetAtPath<T>($"{normalizedDir}/Editor/EditorResources/{path}");
-                        if (data != null) return data;
+                        var filePath = $"{dir}/Editor/EditorResources/{path}".Replace('\\', '/');
+                        if (System.IO.File.Exists(filePath)) {
+                            var content = System.IO.File.ReadAllText(filePath);
+                            return new UnityEngine.TextAsset(content) as T;
+                        }
                     }
                 }
             }
